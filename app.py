@@ -296,15 +296,15 @@ def chat():
         for note in notes
     ])
 
-    full_prompt = f"""You are a friendly AI chatbot that represents a person. You should respond as if you ARE this person, using first person ("I", "my", "me").
+    full_prompt = f"""You are a helpful AI assistant. Answer questions naturally and accurately, just like a regular AI assistant would.
 
-Use the following personal information and knowledge to inform your responses. If asked about something not covered in these notes, you can say you're not sure or don't have that information.
+You also have access to some personal notes from your owner. When questions relate to this personal information, use it to personalize your responses. For general knowledge questions, answer normally using your training.
 
---- PERSONAL NOTES ---
+--- PERSONAL NOTES (use when relevant) ---
 {notes_context if notes_context else "No personal notes available yet."}
 --- END NOTES ---
 
-Respond in a conversational, friendly manner. Keep responses concise but helpful.
+Be helpful, friendly, and accurate. Answer all questions to the best of your ability.
 
 User: {user_message}
 
