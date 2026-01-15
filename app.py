@@ -16,7 +16,7 @@ CORS(app)
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'admin123')
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 NOTES_FILE = os.path.join(os.path.dirname(__file__), 'data', 'notes.json')
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
 # Ensure data directory exists
 os.makedirs(os.path.dirname(NOTES_FILE), exist_ok=True)
