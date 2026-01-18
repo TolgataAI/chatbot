@@ -92,6 +92,7 @@ const chatContainer = document.getElementById('chatContainer');
 const chatForm = document.getElementById('chatForm');
 const messageInput = document.getElementById('messageInput');
 let firstMessage = true;
+let conversationHistory = [];
 
 chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -103,7 +104,10 @@ chatForm.addEventListener('submit', async (e) => {
         firstMessage = false;
     }
 
-    // Add user message
+    // Add user message to history
+    conversationHistory.push({ role: 'user', content: message });
+
+    // Add user message to UI
     chatContainer.innerHTML += `<div class="message user">${escapeHtml(message)}</div>`;
     messageInput.value = '';
     chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -117,7 +121,7 @@ chatForm.addEventListener('submit', async (e) => {
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message, history: conversationHistory.slice(0, -1) })
         });
         const data = await response.json();
 
@@ -125,8 +129,10 @@ chatForm.addEventListener('submit', async (e) => {
 
         if (data.error) {
             chatContainer.innerHTML += `<div class="message error">${escapeHtml(data.error)}</div>`;
+            conversationHistory.pop();
         } else {
             chatContainer.innerHTML += `<div class="message bot">${escapeHtml(data.response)}</div>`;
+            conversationHistory.push({ role: 'assistant', content: data.response });
         }
     } catch (err) {
         document.getElementById(loadingId).remove();
@@ -286,6 +292,7 @@ def logout():
 def chat():
     data = request.get_json()
     user_message = data.get('message', '').strip()
+    history = data.get('history', [])
 
     if not user_message:
         return jsonify({'error': 'Message is required'}), 400
@@ -296,6 +303,13 @@ def chat():
         for note in notes
     ])
 
+    # Build conversation history string
+    history_text = ""
+    if history:
+        for msg in history[-10:]:  # Keep last 10 messages to avoid token limits
+            role = "User" if msg.get('role') == 'user' else "Assistant"
+            history_text += f"{role}: {msg.get('content', '')}\n\n"
+
     full_prompt = f"""You are a helpful AI assistant. Answer questions naturally and accurately, just like a regular AI assistant would.
 
 You also have access to some personal notes from your owner. When questions relate to this personal information, use it to personalize your responses. For general knowledge questions, answer normally using your training.
@@ -305,6 +319,10 @@ You also have access to some personal notes from your owner. When questions rela
 --- END NOTES ---
 
 Be helpful, friendly, and accurate. Answer all questions to the best of your ability.
+
+--- CONVERSATION HISTORY ---
+{history_text if history_text else "No previous messages."}
+--- END HISTORY ---
 
 User: {user_message}
 
