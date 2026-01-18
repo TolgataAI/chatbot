@@ -306,7 +306,7 @@ def chat():
     # Build conversation history string
     history_text = ""
     if history:
-        for msg in history[-10:]:  # Keep last 10 messages to avoid token limits
+        for msg in history:  # Full conversation history
             role = "User" if msg.get('role') == 'user' else "Assistant"
             history_text += f"{role}: {msg.get('content', '')}\n\n"
 
